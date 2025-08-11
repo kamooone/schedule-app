@@ -46,6 +46,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 
+  flutter_native_splash: ^2.4.6
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -56,6 +58,15 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/schedule_splash.png
+
+
+flutter_native_splash:
+  color: "#673AB7"      # 好きな背景色（例：紫）
+  image: assets/schedule_splash.png  # 使いたいスプラッシュ画像のパス
+  android: true
+  ios: true
 
   # To add assets to your application, add an assets section, like this:
   # assets:
