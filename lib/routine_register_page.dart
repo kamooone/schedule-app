@@ -8,6 +8,7 @@ class RoutineRegisterPage extends StatefulWidget {
 }
 
 class _RoutineRegisterPageState extends State<RoutineRegisterPage> {
+  // 曜日リスト
   final List<String> weekDays = ["月", "火", "水", "木", "金", "土", "日"];
 
   // 各曜日ごとのルーティンを管理
@@ -21,18 +22,22 @@ class _RoutineRegisterPageState extends State<RoutineRegisterPage> {
     "日": [],
   };
 
-  // ルーティンダイアログ
+  // -----------------------------
+  // ルーティンダイアログを表示
+  // -----------------------------
   void _showRoutineDialog(String day, {String? currentValue, int? index}) {
     final controller = TextEditingController(text: currentValue ?? "");
 
     showDialog(
       context: context,
-      builder: (context) => _buildRoutineDialog(day, controller, currentValue, index),
+      builder: (_) => _buildRoutineAlertDialog(day, controller, currentValue, index),
     );
   }
 
-  // AlertDialog を返すメソッド
-  Widget _buildRoutineDialog(
+  // -----------------------------
+  // AlertDialog を生成して返す
+  // -----------------------------
+  AlertDialog _buildRoutineAlertDialog(
       String day,
       TextEditingController controller,
       String? currentValue,
@@ -48,44 +53,79 @@ class _RoutineRegisterPageState extends State<RoutineRegisterPage> {
     );
   }
 
-  // actions を返すメソッド
+  // -----------------------------
+  // ダイアログ内のボタンを生成して返す
+  // -----------------------------
   List<Widget> _buildDialogActions(
       String day,
       TextEditingController controller,
       String? currentValue,
       int? index,
       ) {
-    return [
-      if (currentValue != null)
-        TextButton(
-          onPressed: () {
-            _deleteRoutine(day, index!);
-            Navigator.pop(context);
-          },
-          child: const Text("削除", style: TextStyle(color: Colors.red)),
-        ),
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text("キャンセル"),
-      ),
-      TextButton(
-        onPressed: () {
-          _saveRoutine(day, controller.text, currentValue, index);
-          Navigator.pop(context);
-        },
-        child: const Text("保存"),
-      ),
-    ];
+    final List<Widget> actions = [];
+
+    // 削除ボタン
+    if (currentValue != null) {
+      actions.add(_buildDeleteButton(day, index!));
+    }
+
+    // キャンセルボタン
+    actions.add(_buildCancelButton());
+
+    // 保存ボタン
+    actions.add(_buildSaveButton(day, controller.text, currentValue, index));
+
+    return actions;
   }
 
-  // ルーティン削除
+  // -----------------------------
+  // 削除ボタン
+  // -----------------------------
+  Widget _buildDeleteButton(String day, int index) {
+    return TextButton(
+      onPressed: () {
+        _deleteRoutine(day, index);
+        Navigator.pop(context);
+      },
+      child: const Text("削除", style: TextStyle(color: Colors.red)),
+    );
+  }
+
+  // -----------------------------
+  // キャンセルボタン
+  // -----------------------------
+  Widget _buildCancelButton() {
+    return TextButton(
+      onPressed: () => Navigator.pop(context),
+      child: const Text("キャンセル"),
+    );
+  }
+
+  // -----------------------------
+  // 保存ボタン
+  // -----------------------------
+  Widget _buildSaveButton(String day, String text, String? currentValue, int? index) {
+    return TextButton(
+      onPressed: () {
+        _saveRoutine(day, text, currentValue, index);
+        Navigator.pop(context);
+      },
+      child: const Text("保存"),
+    );
+  }
+
+  // -----------------------------
+  // ルーティン削除処理
+  // -----------------------------
   void _deleteRoutine(String day, int index) {
     setState(() {
       routines[day]?.removeAt(index);
     });
   }
 
-  // ルーティン保存（追加 or 編集）
+  // -----------------------------
+  // ルーティン保存（追加 or 編集）処理
+  // -----------------------------
   void _saveRoutine(String day, String text, String? currentValue, int? index) {
     setState(() {
       if (currentValue == null) {
@@ -96,82 +136,101 @@ class _RoutineRegisterPageState extends State<RoutineRegisterPage> {
     });
   }
 
-  // 曜日ラベル
-  Widget _buildDayLabel(String day) {
-    return Container(
-      padding: const EdgeInsets.all(8),
+  // -----------------------------
+  // 曜日ラベルを作成
+  // -----------------------------
+  Widget _buildDayLabel(String day) => Container(
+    height: 40,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.black26),
       color: Colors.blue.shade100,
-      child: Text(
-        day,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
+    ),
+    child: Text(day, style: const TextStyle(fontWeight: FontWeight.bold)),
+  );
 
-  // ルーティンカード
+  // -----------------------------
+  // 個別ルーティンカードを作成
+  // -----------------------------
   Widget _buildRoutineCard(String day, String routine, int index) {
     return GestureDetector(
       onTap: () => _showRoutineDialog(day, currentValue: routine, index: index),
-      child: Card(
-        margin: const EdgeInsets.all(4),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(routine),
+      child: Container(
+        margin: const EdgeInsets.all(2),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black26),
+          borderRadius: BorderRadius.circular(4),
+          color: Colors.white,
         ),
+        child: Text(routine),
       ),
     );
   }
 
-  // ルーティン一覧
+  // -----------------------------
+  // ルーティン追加ボタンを作成
+  // -----------------------------
+  Widget _buildAddButton(String day) => GestureDetector(
+    onTap: () => _showRoutineDialog(day),
+    child: Container(
+      margin: const EdgeInsets.all(2),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black26),
+        borderRadius: BorderRadius.circular(4),
+        color: Colors.grey.shade200,
+      ),
+      child: const Center(child: Text("+ 追加", style: TextStyle(color: Colors.grey))),
+    ),
+  );
+
+  // -----------------------------
+  // 曜日列のルーティン一覧を作成
+  // -----------------------------
   Widget _buildRoutineList(String day) {
+    final routineWidgets = routines[day]!
+        .asMap()
+        .entries
+        .map((e) => _buildRoutineCard(day, e.value, e.key))
+        .toList();
+    routineWidgets.add(_buildAddButton(day));
+
     return Expanded(
-      child: ListView(
-        children: [
-          ...routines[day]!.asMap().entries.map(
-                (entry) => _buildRoutineCard(day, entry.value, entry.key),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(color: Colors.black26),
+            bottom: BorderSide(color: Colors.black26),
           ),
-          // 新規追加ボタン
-          GestureDetector(
-            onTap: () => _showRoutineDialog(day),
-            child: Container(
-              margin: const EdgeInsets.all(4),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: Text(
-                  "+ 追加",
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
+        child: ListView(padding: const EdgeInsets.all(4), children: routineWidgets),
       ),
     );
   }
 
-  // 曜日列
-  Widget _buildDayColumn(String day) {
-    return Expanded(
-      child: Column(
-        children: [
-          _buildDayLabel(day),
-          _buildRoutineList(day),
-        ],
-      ),
-    );
-  }
+  // -----------------------------
+  // 曜日列全体（ラベル＋ルーティンリスト）を作成
+  // -----------------------------
+  Widget _buildRoutineColumn(String day) => Expanded(
+    child: Column(
+      children: [_buildDayLabel(day), _buildRoutineList(day)],
+    ),
+  );
 
+  // -----------------------------
+  // 全曜日列を作成
+  // -----------------------------
+  List<Widget> _buildDayColumns() => weekDays.map(_buildRoutineColumn).toList();
+
+  // -----------------------------
+  // 画面構築
+  // -----------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("ルーティン登録")),
-      body: Row(
-        children: weekDays.map(_buildDayColumn).toList(),
-      ),
+      body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: _buildDayColumns()),
     );
   }
 }
